@@ -1,0 +1,196 @@
+/*
+ * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+/dts-v1/;
+
+#include "am33xx.dtsi"
+#include "am335x-bone-common.dtsi"
+/*#include <dt-bindings/interrupt-controller/irq.h>*/
+
+/ {
+	model = "TI AM335x BeagleBone Black";
+	compatible = "ti,am335x-bone-black", "ti,am335x-bone", "ti,am33xx";
+};
+
+&ldo3_reg {
+	regulator-min-microvolt = <1800000>;
+	regulator-max-microvolt = <1800000>;
+	regulator-always-on;
+};
+
+&mmc1 {
+	vmmc-supply = <&vmmcsd_fixed>;
+};
+
+&mmc2 {
+	vmmc-supply = <&vmmcsd_fixed>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&emmc_pins>;
+	bus-width = <8>;
+	status = "okay";
+};
+
+&am33xx_pinmux {
+	pinctrl-names = "default";
+	pinctrl-0 = <&cyttsp6_pins>;
+
+        cyttsp6_pins: pinmux_cyttsp6_pins {
+                pinctrl-single,pins = <
+                        /*0x1a4 0x37*/      /* gpmc_a14.gpio_38 INPUT PULLUP | MODE7 */
+                        0x040 0x37      /* gpmc_a14.gpio_38 INPUT PULLUP | MODE7 */
+                        0x1ac 0x7        /* gpmc_a13.gpio_37 OUTPUT | MODE7 */
+                >;
+        };
+
+	nxp_hdmi_bonelt_pins: nxp_hdmi_bonelt_pins {
+		pinctrl-single,pins = <
+			0x1b0 0x03      /* xdma_event_intr0, OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT */
+			0xa0 0x08       /* lcd_data0.lcd_data0, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xa4 0x08       /* lcd_data1.lcd_data1, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xa8 0x08       /* lcd_data2.lcd_data2, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xac 0x08       /* lcd_data3.lcd_data3, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xb0 0x08       /* lcd_data4.lcd_data4, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xb4 0x08       /* lcd_data5.lcd_data5, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xb8 0x08       /* lcd_data6.lcd_data6, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xbc 0x08       /* lcd_data7.lcd_data7, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xc0 0x08       /* lcd_data8.lcd_data8, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xc4 0x08       /* lcd_data9.lcd_data9, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xc8 0x08       /* lcd_data10.lcd_data10, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xcc 0x08       /* lcd_data11.lcd_data11, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xd0 0x08       /* lcd_data12.lcd_data12, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xd4 0x08       /* lcd_data13.lcd_data13, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xd8 0x08       /* lcd_data14.lcd_data14, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xdc 0x08       /* lcd_data15.lcd_data15, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT | AM33XX_PULL_DISA */
+			0xe0 0x00       /* lcd_vsync.lcd_vsync, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT */
+			0xe4 0x00       /* lcd_hsync.lcd_hsync, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT */
+			0xe8 0x00       /* lcd_pclk.lcd_pclk, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT */
+			0xec 0x00       /* lcd_ac_bias_en.lcd_ac_bias_en, OMAP_MUX_MODE0 | AM33XX_PIN_OUTPUT */
+		>;
+	};
+	nxp_hdmi_bonelt_off_pins: nxp_hdmi_bonelt_off_pins {
+		pinctrl-single,pins = <
+			0x1b0 0x03      /* xdma_event_intr0, OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT */
+		>;
+	};
+};
+
+&lcdc {
+	status = "okay";
+	port {
+		lcdc_0: endpoint@0 {
+			remote-endpoint = <&hdmi_0>;
+		};
+	};
+};
+
+&i2c0 {
+	tda19988 {
+		compatible = "nxp,tda998x";
+		reg = <0x70>;
+		pinctrl-names = "default", "off";
+		pinctrl-0 = <&nxp_hdmi_bonelt_pins>;
+		pinctrl-1 = <&nxp_hdmi_bonelt_off_pins>;
+
+		port {
+			hdmi_0: endpoint@0 {
+				remote-endpoint = <&lcdc_0>;
+			};
+		};
+	};
+};
+
+&i2c2 {
+	clock-frequency = <400000>;
+
+        tsc@24 {
+                compatible = "cy,cyttsp6_i2c_adapter";
+                reg = <0x24>;
+                /* GPIO 38, high-to-low edge triggered */
+                /*interrupts = <6 IRQ_TYPE_EDGE_FALLING>;*/
+                /*interrupt-parent = <&gpio1>;*/
+
+                cy,core {
+                        cy,irq_gpio = <&gpio1 16 GPIO_ACTIVE_LOW>;
+                        cy,rst_gpio = <&gpio3 21 GPIO_ACTIVE_LOW>;
+                        cy,err_gpio = <&gpio1 17 GPIO_ACTIVE_LOW>;
+
+                        /* Enable cy,max_xfer_len to limit max I2C/SPI transfer length */
+                        cy,max_xfer_len = <0x100>;
+
+                        /* CY_CORE_FLAG_WAKE_ON_GESTURE */
+                        /* cy,flags = <1>; */ 
+                        /* CY_CORE_EWG_TAP_TAP | CY_CORE_EWG_TWO_FINGER_SLIDE */
+                        /* cy,easy_wakeup_gesture = <3>; */
+                        cy,btn_keys = <172 /* KEY_HOMEPAGE */
+                                           /* previously was KEY_HOME, new Android versions use KEY_HOMEPAGE */
+                                       139 /* KEY_MENU */
+                                       158 /* KEY_BACK */
+                                       217 /* KEY_SEARCH */
+                                       114 /* KEY_VOLUMEDOWN */
+                                       115 /* KEY_VOLUMEUP */
+                                       212 /* KEY_CAMERA */
+                                       116>; /* KEY_POWER */
+                        cy,btn_keys-tag = <0>;
+
+                        cy,mt {
+                                cy,inp_dev_name = "cyttsp6_mt";
+                                /* CY_MT_FLAG_FLIP | CY_MT_FLAG_INV_X | CY_MT_FLAG_INV_Y */
+                               /* cy,flags = <0x38>;*/
+                                cy,abs =
+                                        /* ABS_MT_POSITION_X, CY_ABS_MIN_X, CY_ABS_MAX_X, 0, 0 */
+                                        <0x35 0 1526 0 0
+                                        /* ABS_MT_POSITION_Y, CY_ABS_MIN_Y, CY_ABS_MAX_Y, 0, 0 */
+                                        0x36 0 768 0 0
+                                        /* ABS_MT_PRESSURE, CY_ABS_MIN_P, CY_ABS_MAX_P, 0, 0 */
+                                        0x3a 0 255 0 0
+                                        /* CY_IGNORE_VALUE, CY_ABS_MIN_W, CY_ABS_MAX_W, 0, 0 */
+                                        0xffff 0 255 0 0
+                                        /* ABS_MT_TRACKING_ID, CY_ABS_MIN_T, CY_ABS_MAX_T, 0, 0 */
+                                        0x39 0 15 0 0
+                                        /* ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0 */
+                                        0x30 0 255 0 0
+                                        /* ABS_MT_TOUCH_MINOR, 0, 255, 0, 0 */
+                                        0x31 0 255 0 0
+                                        /* ABS_MT_ORIENTATION, -127, 127, 0, 0 */
+                                        0x34 0xffffff81 127 0 0
+                                        /* ABS_MT_TOOL_TYPE, 0, MT_TOOL_MAX, 0, 0 */
+                                        0x37 0 1 0 0
+                                        /* ABS_DISTANCE, 0, 255, 0, 0 */
+                                        0x19 0 255 0 0>;
+
+                                cy,vkeys_x = <1366>;
+                                cy,vkeys_y = <768>;
+
+                                cy,virtual_keys = /* KeyCode CenterX CenterY Width Height */
+                                        /* KEY_BACK */
+                                        <158 1360 90 160 180
+                                        /* KEY_MENU */
+                                        139 1360 270 160 180
+                                        /* KEY_HOMEPAGE */
+                                        172 1360 450 160 180
+                                        /* KEY SEARCH */
+                                        217 1360 630 160 180>;
+                        };
+
+                        cy,btn {
+                                cy,inp_dev_name = "cyttsp6_btn";
+                        };
+
+                        cy,proximity {
+                                cy,inp_dev_name = "cyttsp6_proximity";
+                                cy,abs =
+                                        /* ABS_DISTANCE, CY_PROXIMITY_MIN_VAL, CY_PROXIMITY_MAX_VAL, 0, 0 */
+                                        <0x19 0 1 0 0>;
+                        };
+                };
+        };
+
+};
+
+&rtc {
+	system-power-controller;
+};
